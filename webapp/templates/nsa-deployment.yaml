@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "webapp.fullname" . }}-new-super-secret-app
+  labels:
+    {{- include "webapp.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.newSuperSecretApp.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "webapp.name" . }}-new-super-secret-app
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ include "webapp.name" . }}-new-super-secret-app
+    spec:
+      volumes:
+        - name: data
+          hostPath:
+            path: {{ .Values.newSuperSecretApp.hostPath }}
+            type: DirectoryOrCreate
+      initContainers:
+        - name: mnt-change-permissions
+          image: {{ .Values.newSuperSecretApp.initContainers.image }}
+          command:
+            - sh
+            - -c
+            - |
+              find /mnt/data -exec chown 1000:1001 {} + 2>/dev/null
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/data 
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+      containers:
+        - name: new-super-secret-app
+          image: "{{ .Values.newSuperSecretApp.image.repository }}:{{ .Values.newSuperSecretApp.image.tag }}"
+          args: 
+            - "-text=hello"
+          envFrom:
+            - secretRef:
+                name: {{ .Values.newSuperSecretApp.secretName }}
+          env:
+            - name: QUEUES
+              value: {{ toJson .Values.newSuperSecretApp.queues | quote }}
+          volumeMounts:
+            - name: data
+              mountPath: /mnt/data
+          resources:
+            requests:
+              cpu: {{ .Values.newSuperSecretApp.resources.requests.cpu }}
+              memory: {{ .Values.newSuperSecretApp.resources.requests.memory }}
+      terminationGracePeriodSeconds: 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
