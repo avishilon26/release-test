@@ -116,6 +116,9 @@ spec:
         - name: super-secret
           image: "hashicorp/http-echo:0.2.3"
           imagePullPolicy: IfNotPresent
+          args:
+            - -text=hello world
+            - -listen=:80
           ports:
             - name: http
               containerPort: 80
@@ -127,11 +130,11 @@ spec:
             - mountPath: /mnt/data
               name: data
           env:
-            - name: DB_HOST
+            - name: db
               valueFrom:
                 secretKeyRef:
                   name: new-super-secret-app-secrets
-                  key: "DB_HOST"
+                  key: DB_HOST
           livenessProbe:
             httpGet:
               path: /
