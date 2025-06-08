@@ -240,39 +240,6 @@ spec:
           type: Utilization
           averageUtilization: 80
 ---
-# Source: webapp-umbrella/charts/super-secret/templates/new-super-secret-app-externalsecret.yaml
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: new-super-secret-app-secrets
-  labels:
-    helm.sh/chart: super-secret-0.1.0
-    app.kubernetes.io/name: super-secret
-    app.kubernetes.io/instance: gabi-test
-    app.kubernetes.io/version: "1.16.0"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  refreshInterval: 1h
-  secretStoreRef:
-    kind: SecretStore
-    name: vault-backend
-  target: 
-    name: new-super-secret-app-secrets
-    creationPolicy: Owner
-  data:
-    - secretKey: DB_HOST
-      remoteRef:
-        key: app/secrets/db-creds
-        property: dbHost
-    - secretKey: DB_USERNAME
-      remoteRef:
-        key: app/secrets/db-creds
-        property: dbUser
-    - secretKey: DB_PASSWORD
-      remoteRef:
-        key: app/secrets/db-creds
-        property: dbPass
----
 # Source: webapp-umbrella/charts/super-secret/templates/scaledobject.yaml
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
