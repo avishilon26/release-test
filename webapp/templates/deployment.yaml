@@ -32,6 +32,25 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.initContainers }}
+        {{- if .enabled }}
+      initContainers:
+        - name: mnt-change-permissions
+          image: {{ .Values.initContainers.image }}
+          command:
+            - sh
+            - -c
+            - find /mnt/data -exec chown 1000:1001 {} + 2>/dev/null
+          {{- if .Values.initContainers.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.initContainers.volumeMounts | nindent 12 }}
+          {{- end }}
+          imagePullPolicy: Always
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -44,6 +63,19 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          {{- if .Values.secretName }}
+            - secretRef:
+                name: {{ .Values.secretName }}
+          {{- end }}
+          {{- if .Values.queues }}
+          env:
+            - name: QUEUES
+              value: '{{ toJson .Values.queues }}'
+          {{- end }}
+          {{- if .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

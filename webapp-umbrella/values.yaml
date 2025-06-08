@@ -11,34 +11,34 @@ webapp-a:
     kind: HorizontalPodAutoscaler
 
 
-  newSuperSecretApp:
-    replicaCount: 1
-    hostPath: /host-share/data
-    initContainers:
-      image: busybox:1.36
-    image:
-      repository: hashicorp/http-echo
-      tag: "0.2.3"
-    configMapName: new-super-secret-app-config
-    secretName: new-super-secret-app-secrets
-    queues:
-      - all
-    resources:
-      requests:
-        cpu: 450m
-        memory: 750Mi
-    priorityClassName: secret-priority
-    autoscaling:
-      enabled: true
-      kind: "Keda"
-    secret:
-      enabled: true
-      name: new-super-secret-app-secrets
-      remoteKey: app/secrets/db-creds
-      store:
-        kind: SecretStore
-        name: vault-backend
-      useFakeForTesting: true
+super-secret:
+  replicaCount: 1
+  hostPath: /host-share/data
+  initContainers:
+    image: busybox:1.36
+  image:
+    repository: hashicorp/http-echo
+    tag: "0.2.3"
+  configMapName: new-super-secret-app-config
+  secretName: new-super-secret-app-secrets
+  queues:
+    - all
+  resources:
+    requests:
+      cpu: 450m
+      memory: 750Mi
+  priorityClassName: secret-priority
+  autoscaling:
+    enabled: true
+    kind: "Keda"
+  secret:
+    enabled: true
+    name: new-super-secret-app-secrets
+    remoteKey: app/secrets/db-creds
+    store:
+      kind: SecretStore
+      name: vault-backend
+    useFakeForTesting: true
 
 
 
