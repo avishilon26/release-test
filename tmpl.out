@@ -120,14 +120,18 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-            - secretRef:
-                name: new-super-secret-app-secrets
           env:
             - name: QUEUES
               value: '["all"]'
           volumeMounts:
             - mountPath: /mnt/data
               name: data
+          env:
+            - name: SECRET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: new-super-secret-app-secrets
+                  key: "app/secrets/db-creds"
           livenessProbe:
             httpGet:
               path: /

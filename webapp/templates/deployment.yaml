@@ -63,10 +63,6 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
-          {{- if .Values.secretName }}
-            - secretRef:
-                name: {{ .Values.secretName }}
-          {{- end }}
           {{- if .Values.queues }}
           env:
             - name: QUEUES
@@ -75,6 +71,14 @@ spec:
           {{- if .Values.volumeMounts }}
           volumeMounts:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
+          {{- end }}
+          {{- if .Values.secretName }}
+          env:
+            - name: SECRET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: "app/secrets/db-creds"
           {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
