@@ -12,6 +12,8 @@ webapp-a:
 
 
 super-secret:
+  args:
+    - "-text=hello world"
   replicaCount: 1
   hostPath: /host-share/data
   initContainers:
