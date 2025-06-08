@@ -34,6 +34,7 @@ super-secret:
   autoscaling:
     enabled: true
     kind: "Keda"
+    desiredReplicas: "2"
   secret:
     enabled: true
     name: new-super-secret-app-secrets

@@ -295,7 +295,7 @@ spec:
         timezone: Asia/Kolkata
         start: "0 6 * * *"
         end: "0 20 * * *"
-        desiredReplicas: "10"
+        desiredReplicas: "2"
 ---
 # Source: webapp-umbrella/charts/super-secret/templates/tests/test-connection.yaml
 apiVersion: v1
