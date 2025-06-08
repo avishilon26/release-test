@@ -279,8 +279,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 spec:
   scaleTargetRef:
-    app.kubernetes.io/name: super-secret
-    app.kubernetes.io/instance: gabi-test
+    name: gabi-test-super-secret
   minReplicaCount: 0
   cooldownPeriod: 300
   triggers:

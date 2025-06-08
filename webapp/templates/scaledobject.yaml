@@ -9,7 +9,7 @@ metadata:
 {{ include "webapp.labels" . | indent 4 }}
 spec:
   scaleTargetRef:
-{{ include "webapp.selectorLabels" . | indent 4 }}
+    name: {{ include "webapp.fullname" . }}
   minReplicaCount: 0
   cooldownPeriod: 300
   triggers:
