@@ -131,7 +131,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: new-super-secret-app-secrets
-                  key: "app/secrets/db-creds"
+                  key: "new-super-secret-app-secrets"
           livenessProbe:
             httpGet:
               path: /

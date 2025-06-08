@@ -78,7 +78,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.secretName }}
-                  key: "app/secrets/db-creds"
+                  key: "new-super-secret-app-secrets"
           {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
