@@ -28,3 +28,7 @@ dependencies:
     version: 0.1.0
     repository: "file://../webapp"
     alias: webapp-a
+  - name: webapp
+    version: 0.1.0
+    repository: "file://../webapp"
+    alias: super-secret

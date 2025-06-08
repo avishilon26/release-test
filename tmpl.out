@@ -1,26 +1,78 @@
 ---
+# Source: webapp-umbrella/charts/super-secret/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gabi-test-super-secret
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+automountServiceAccountToken: true
+---
 # Source: webapp-umbrella/charts/webapp-a/templates/serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: test-webapp-a
+  name: gabi-test-webapp-a
   labels:
     helm.sh/chart: webapp-a-0.1.0
     app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: gabi-test
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 automountServiceAccountToken: true
+---
+# Source: webapp-umbrella/charts/super-secret/templates/manual-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: new-super-secret-app-secrets
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+stringData:
+  DB_HOST: "127.0.0.1"
+  DB_USERNAME: "psql"
+  DB_PASSWORD: "superhardpassword"
+---
+# Source: webapp-umbrella/charts/super-secret/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gabi-test-super-secret
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
 ---
 # Source: webapp-umbrella/charts/webapp-a/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: test-webapp-a
+  name: gabi-test-webapp-a
   labels:
     helm.sh/chart: webapp-a-0.1.0
     app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: gabi-test
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -32,34 +84,99 @@ spec:
       name: http
   selector:
     app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: gabi-test
+---
+# Source: webapp-umbrella/charts/super-secret/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gabi-test-super-secret
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: super-secret
+      app.kubernetes.io/instance: gabi-test
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: super-secret-0.1.0
+        app.kubernetes.io/name: super-secret
+        app.kubernetes.io/instance: gabi-test
+        app.kubernetes.io/version: "1.16.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: gabi-test-super-secret
+      containers:
+        - name: super-secret
+          image: "hashicorp/http-echo:0.2.3"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - secretRef:
+                name: new-super-secret-app-secrets
+          env:
+            - name: QUEUES
+              value: '["all"]'
+          volumeMounts:
+            - mountPath: /mnt/data
+              name: data
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            requests:
+              cpu: 450m
+              memory: 750Mi
+          volumeMounts:
+            - mountPath: /mnt/data
+              name: data
+      volumes:
+        - hostPath:
+            path: /host-share/data
+            type: DirectoryOrCreate
+          name: data
+      nodeSelector:
+        karpenter.sh/nodepool: test
 ---
 # Source: webapp-umbrella/charts/webapp-a/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-webapp-a
+  name: gabi-test-webapp-a
   labels:
     helm.sh/chart: webapp-a-0.1.0
     app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: gabi-test
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: webapp-a
-      app.kubernetes.io/instance: test
+      app.kubernetes.io/instance: gabi-test
   template:
     metadata:
       labels:
         helm.sh/chart: webapp-a-0.1.0
         app.kubernetes.io/name: webapp-a
-        app.kubernetes.io/instance: test
+        app.kubernetes.io/instance: gabi-test
         app.kubernetes.io/version: "1.16.0"
         app.kubernetes.io/managed-by: Helm
     spec:
-      serviceAccountName: test-webapp-a
+      serviceAccountName: gabi-test-webapp-a
       containers:
         - name: webapp-a
           image: "nginx:alpine"
@@ -94,18 +211,18 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: test-webapp-a
+  name: gabi-test-webapp-a
   labels:
     helm.sh/chart: webapp-a-0.1.0
     app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    app.kubernetes.io/instance: gabi-test
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: test-webapp-a
+    name: gabi-test-webapp-a
   minReplicas: 1
   maxReplicas: 100
   metrics:
@@ -116,15 +233,73 @@ spec:
           type: Utilization
           averageUtilization: 80
 ---
-# Source: webapp-umbrella/charts/webapp-a/templates/tests/test-connection.yaml
+# Source: webapp-umbrella/charts/super-secret/templates/new-super-secret-app-externalsecret.yaml
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: new-super-secret-app-secrets
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: SecretStore
+    name: vault-backend
+  target: 
+    name: new-super-secret-app-secrets
+    creationPolicy: Owner
+  data:
+    - secretKey: DB_HOST
+      remoteRef:
+        key: app/secrets/db-creds
+        property: dbHost
+    - secretKey: DB_USERNAME
+      remoteRef:
+        key: app/secrets/db-creds
+        property: dbUser
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: app/secrets/db-creds
+        property: dbPass
+---
+# Source: webapp-umbrella/charts/super-secret/templates/scaledobject.yaml
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: gabi-test-super-secret
+  labels:
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  scaleTargetRef:
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
+  minReplicaCount: 0
+  cooldownPeriod: 300
+  triggers:
+    - type: cron
+      metadata:
+        timezone: Asia/Kolkata
+        start: "0 6 * * *"
+        end: "0 20 * * *"
+        desiredReplicas: "10"
+---
+# Source: webapp-umbrella/charts/super-secret/templates/tests/test-connection.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "test-webapp-a-test-connection"
+  name: "gabi-test-super-secret-test-connection"
   labels:
-    helm.sh/chart: webapp-a-0.1.0
-    app.kubernetes.io/name: webapp-a
-    app.kubernetes.io/instance: test
+    helm.sh/chart: super-secret-0.1.0
+    app.kubernetes.io/name: super-secret
+    app.kubernetes.io/instance: gabi-test
     app.kubernetes.io/version: "1.16.0"
     app.kubernetes.io/managed-by: Helm
   annotations:
@@ -134,5 +309,26 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['test-webapp-a:80']
+      args: ['gabi-test-super-secret:80']
+  restartPolicy: Never
+---
+# Source: webapp-umbrella/charts/webapp-a/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "gabi-test-webapp-a-test-connection"
+  labels:
+    helm.sh/chart: webapp-a-0.1.0
+    app.kubernetes.io/name: webapp-a
+    app.kubernetes.io/instance: gabi-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['gabi-test-webapp-a:80']
   restartPolicy: Never

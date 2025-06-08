@@ -2,5 +2,8 @@ dependencies:
 - name: webapp
   repository: file://../webapp
   version: 0.1.0
-digest: sha256:59a674af55e1e533fcf6d5837909f75ef90763056af74bdd085cc1fb3cbd5209
-generated: "2025-06-05T06:32:28.865001+03:00"
+- name: webapp
+  repository: file://../webapp
+  version: 0.1.0
+digest: sha256:6aa6ed464e0d09fc464d342582fac937afcbdc77e2c136bfa27cb720394db004
+generated: "2025-06-08T09:46:35.136858895Z"
