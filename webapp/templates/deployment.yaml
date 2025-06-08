@@ -74,11 +74,11 @@ spec:
           {{- end }}
           {{- if .Values.secretName }}
           env:
-            - name: DB_HOST
+            - name: db
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.secretName }}
-                  key: "DB_HOST"
+                  key: DB_HOST
           {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
